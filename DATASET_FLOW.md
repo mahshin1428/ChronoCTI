@@ -4,7 +4,7 @@ This document explains the lifecycle, lineage, and transformation of all dataset
 
 ---
 
-## 📊 1. Dotted Flowchart (Mermaid)
+## 1. Dotted Flowchart (Mermaid)
 
 ```mermaid
 flowchart TD
@@ -14,10 +14,10 @@ flowchart TD
     classDef output fill:#78350f,stroke:#f59e0b,stroke-width:1px,color:#fff;
 
     %% Parent Datasets (Roots)
-    P1["👤 Curated CTI Reports <br> (curated CTI report sets/)"]:::parent
-    P2["🏷️ Core Technique Mappings <br> (train.jsonl / test.jsonl)"]:::parent
-    P3["💬 Discourse Annotations <br> (discourse_train_v2.xlsx)"]:::parent
-    P4["⏱️ Temporal Ground-Truth <br> (temporal_relation_dataset.xlsx)"]:::parent
+    P1[" Curated CTI Reports <br> (curated CTI report sets/)"]:::parent
+    P2["Core Technique Mappings <br> (train.jsonl / test.jsonl)"]:::parent
+    P3["Discourse Annotations <br> (discourse_train_v2.xlsx)"]:::parent
+    P4["Temporal Ground-Truth <br> (temporal_relation_dataset.xlsx)"]:::parent
 
     %% Transformations from CTI Reports
     P1 -.->|"create_cti_w2v.py"| D1["cti_w2v_v2 <br> (Word2Vec spaCy Embeddings)"]:::derived
@@ -43,7 +43,7 @@ flowchart TD
 
 ---
 
-## 🎨 2. Dotted ASCII Diagram
+## 2. Dotted ASCII Diagram
 
 ```
 [Parent Raw CTI Reports]
@@ -91,7 +91,7 @@ flowchart TD
 
 ---
 
-## 📑 3. Step-by-Step Dataset Explanations
+## 3. Step-by-Step Dataset Explanations
 
 ### Step 1: Word Embeddings & Language Model Adaption
 * **Source:** [curated CTI report sets/](file:///Users/mahshinislam/ChronoCTI%20Resource/ChronoCTI-main/Datasets/Dataset/CTI%20Reports/curated%20CTI%20report%20sets) (Raw Intrusion Narratives).
