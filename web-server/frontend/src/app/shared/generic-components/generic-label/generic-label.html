@@ -1,0 +1,6 @@
+<span [ngClass]="badgeClasses">
+  @if (icon()) {
+    <span class="material-icons badge-icon">{{ icon() }}</span>
+  }
+  <span>{{ text() }}</span>
+</span>

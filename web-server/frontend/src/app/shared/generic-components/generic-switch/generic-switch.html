@@ -1,0 +1,14 @@
+<label class="gen-switch-wrapper" [class.disabled]="!enable()">
+  <div class="gen-switch">
+    <input 
+      type="checkbox" 
+      [id]="id()" 
+      [checked]="isChecked()" 
+      [disabled]="!enable()" 
+      (change)="toggle($event)">
+    <span class="gen-switch-slider"></span>
+  </div>
+  @if (label()) {
+    <span class="gen-switch-label">{{ label() }}</span>
+  }
+</label>

@@ -1,0 +1,80 @@
+<section class="graph-workspace" aria-label="Threat knowledge graph">
+  <div class="graph-heading">
+    <div><div class="eyebrow">INVESTIGATION CANVAS</div><h2>Knowledge graph <span class="live-dot"></span></h2></div>
+    <div class="export-actions"><button (click)="exportJson()" [disabled]="!nodes().length">JSON</button><button (click)="exportSvg()" [disabled]="!nodes().length">SVG</button><button class="primary" (click)="exportPng()" [disabled]="!nodes().length">↓ Export PNG</button></div>
+  </div>
+  <div class="graph-filters">
+    <label class="search"><span aria-hidden="true">⌕</span><input aria-label="Search entities" placeholder="Find a technique or asset…" [ngModel]="query()" (ngModelChange)="query.set($event)"><kbd>/</kbd></label>
+    <button class="filter" [class.active]="showAssets()" [attr.aria-pressed]="showAssets()" (click)="toggleAssets()"><i class="dot asset"></i>Assets</button>
+    <button class="filter" [class.active]="showOrder()" [attr.aria-pressed]="showOrder()" (click)="toggleOrder()">↳ Report order</button>
+    <span class="entity-count">{{ nodes().length }} entities · {{ edges().length }} relations</span>
+  </div>
+  <div class="graph-body">
+    <div #containerRef class="canvas-container" [class.panning]="isPanning">
+      @if (nodes().length) {
+        <svg #svgRef class="flow-svg" aria-label="Interactive technique and asset graph" (pointerdown)="startPointer($event)" (pointermove)="movePointer($event)" (pointerup)="endPointer()" (pointercancel)="endPointer()" (wheel)="onWheel($event)">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="#879cec" stroke-width="1.5" /></marker>
+          </defs>
+          <g id="viewport-group" [attr.transform]="'translate(' + transform.x + ',' + transform.y + ') scale(' + transform.scale + ')'">
+            <g class="lane-labels"><text x="100" y="52" fill="#a6b4e7">01 / ATT&amp;CK TECHNIQUES</text>@if (showAssets()) {<text x="650" y="52" fill="#68cdbd">02 / ASSET CATEGORIES</text>}</g>
+            <g id="edges-layer">
+              @for (edge of edges(); track edge.id) {
+                <g data-interactive="true" class="edge" [class.return-link]="edge.edge_type === 'narrative' && (nodeMap().get(edge.target)!.y - nodeMap().get(edge.source)!.y < 0 || nodeMap().get(edge.target)!.y - nodeMap().get(edge.source)!.y > 180)" [class.dimmed]="dimEdge(edge)" [class.edge-selected]="selectedEdgeId() === edge.id" tabindex="0" role="button" [attr.aria-label]="entityName(edge.source) + ', ' + edge.label + ', ' + entityName(edge.target)" (click)="selectEdge(edge, $event)" (keydown.enter)="selectEdge(edge, $event)" (keydown.space)="$event.preventDefault(); selectEdge(edge, $event)">
+                  <title>{{ edge.basis }}</title>
+                  <path class="edge-line" [attr.d]="route(edge).path" [attr.stroke]="edge.edge_type === 'association' ? '#3f9f91' : '#879cec'" [attr.stroke-dasharray]="edge.edge_type === 'association' ? '5 5' : null" [attr.marker-end]="edge.edge_type === 'narrative' ? 'url(#arrow)' : null" />
+                  <path class="hit-area" [attr.d]="route(edge).path" />
+                  <g class="relation-label" [attr.transform]="'translate(' + route(edge).x + ',' + route(edge).y + ')'">
+                    <rect class="edge-label-bg" x="-49" y="-10" width="98" height="20" rx="10" />
+                    <text class="edge-label" y="4" [attr.fill]="edge.edge_type === 'association' ? '#80cfbf' : '#adbbed'">{{ edge.label }}</text>
+                  </g>
+                </g>
+              }
+            </g>
+            <g id="nodes-layer">
+              @for (node of nodes(); track node.id) {
+                <g data-interactive="true" class="entity-node" [class.dimmed]="dimNode(node)" [class.selected]="selectedId() === node.id" [class.asset-node]="node.type === 'asset'" [attr.transform]="'translate(' + node.x + ',' + node.y + ')'" tabindex="0" role="button" [attr.aria-label]="node.raw_id + ': ' + node.label" (click)="selectNode(node, $event)" (keydown.enter)="selectNode(node, $event)" (keydown.space)="$event.preventDefault(); selectNode(node, $event)">
+                  <title>{{ node.label }} — {{ node.occurrence_count || 1 }} mentions. Select to inspect evidence.</title>
+                  <rect class="node-shadow" x="0" y="5" [attr.width]="node.width" [attr.height]="node.height" rx="13" />
+                  <rect class="node-card" [attr.width]="node.width" [attr.height]="node.height" rx="13" />
+                  <rect x="16" y="15" width="25" height="25" rx="7" [attr.fill]="node.type === 'asset' ? '#153d38' : '#29345b'" />
+                  @if (node.type === 'asset') {<path d="M 22 21 h 13 v 9 h -13 Z M 25 34 h 7 M 28.5 30 v 4" fill="none" stroke="#6ad4be" stroke-width="1.4" />}
+                  @else {<path d="M 28 20 l 6 3 v 6 l -6 5 l -6 -5 v -6 Z M 26 26 l 2 2 l 3 -4" fill="none" stroke="#b5c3ff" stroke-width="1.4" />}
+                  <text class="node-id" x="50" y="32" [attr.fill]="node.type === 'asset' ? '#7ed8c6' : '#adbdff'">{{ node.raw_id }}</text>
+                  <text class="node-count" [attr.x]="node.width - 17" y="31">{{ node.occurrence_count || 1 }}×</text>
+                  <text class="node-title" x="17" y="61">@for (line of wrapText(node.label); track $index) {<tspan x="17" [attr.dy]="$index === 0 ? 0 : 17">{{ line }}</tspan>}</text>
+                  <text class="node-footer" x="17" y="98">{{ node.type === 'asset' ? 'ASSET' : 'TECHNIQUE' }} · {{ (node.sentence_id ?? 0) + 1 | number:'2.0-0' }} FIRST MENTION</text>
+                  <circle [attr.cx]="node.width" [attr.cy]="node.height / 2" r="3.5" [attr.fill]="node.type === 'asset' ? '#6ad4be' : '#adbdff'" />
+                </g>
+              }
+            </g>
+          </g>
+        </svg>
+        @if (query().trim() && !matchedIds().size) {<div class="search-empty" role="status">No entities match “{{ query() }}”. <button (click)="query.set('')">Clear search</button></div>}
+        <div class="zoom-controls"><button aria-label="Zoom out" title="Zoom out" (click)="zoom(1 / 1.2)">−</button><span>{{ transform.scale * 100 | number:'1.0-0' }}%</span><button aria-label="Zoom in" title="Zoom in" (click)="zoom(1.2)">+</button><span class="divider"></span><button (click)="fitToScreen()" title="Fit the entire graph">Fit</button></div>
+        <div class="canvas-hint">Drag to explore · Scroll to zoom · Select to inspect</div>
+      } @else {
+        <div class="empty-state"><div class="empty-symbol">◎</div><div class="eyebrow">FROM NARRATIVE TO NETWORK</div><h3>{{ graph() ? 'No entities detected' : 'Your investigation starts here' }}</h3><p>{{ graph() ? 'Try a report with specific attacker behavior and affected systems.' : 'Add a threat report to reveal techniques, assets, and the connections between them.' }}</p></div>
+      }
+      @if (loading()) {<div class="loading-overlay" role="status"><div class="loader"></div><strong>Mapping your report</strong><span>Identifying entities and connecting evidence…</span></div>}
+      @if (exportError()) {<div class="search-empty" role="alert">{{ exportError() }}</div>}
+    </div>
+    @if (selectedNode(); as node) {
+      <aside class="inspector" aria-label="Entity evidence">
+        <div class="inspector-top"><span class="eyebrow">ENTITY DETAILS</span><button aria-label="Close inspector" (click)="clearSelection()">×</button></div>
+        <span class="entity-tag" [class.asset-tag]="node.type === 'asset'">{{ node.raw_id }} / {{ node.type }}</span><h3>{{ node.label }}</h3>
+        <div class="detail-metrics"><div><strong>{{ node.occurrence_count || 1 }}</strong><span>mentions</span></div><div><strong>{{ connections().length }}</strong><span>connections</span></div></div>
+        <div class="method-note">Detection: {{ node.prediction_sources?.join(' + ') || 'classifier' }}. @if (node.prediction_sources?.includes('keyword')) {Keyword scores are rule values, not measured probabilities.} @else {Highest classifier score: {{ node.confidence | percent:'1.0-1' }}.}</div>
+        @if (node.type === 'technique') {<a class="reference-link" [href]="techniqueUrl(node)" target="_blank" rel="noopener noreferrer">View in MITRE ATT&amp;CK ↗</a>}
+        <h4>Supporting evidence</h4>
+        @for (item of node.evidence || []; track item.sentence_id) {<blockquote><span>SENTENCE {{ item.sentence_id + 1 | number:'2.0-0' }}</span>{{ item.text }}</blockquote>}
+        <h4>Connections</h4>
+        @for (edge of connections(); track edge.id) {<button class="connection" (click)="selectEdge(edge)"><small>{{ edge.label }}</small>{{ entityName(edge.source === node.id ? edge.target : edge.source) }} <span>↗</span></button>}
+      </aside>
+    }
+    @if (selectedEdge(); as edge) {
+      <aside class="inspector" aria-label="Relationship evidence"><div class="inspector-top"><span class="eyebrow">RELATIONSHIP DETAILS</span><button aria-label="Close inspector" (click)="clearSelection()">×</button></div><span class="entity-tag">{{ edge.edge_type }}</span><h3>{{ edge.label }}</h3><div class="relation-pair">{{ entityName(edge.source) }}<span>{{ edge.edge_type === 'association' ? '↔' : '↓' }}</span>{{ entityName(edge.target) }}</div><p class="method-note">{{ edge.basis }}</p><h4>Supporting evidence</h4>@for (item of edge.evidence || []; track item.sentence_id) {<blockquote><span>SENTENCE {{ item.sentence_id + 1 | number:'2.0-0' }}</span>{{ item.text }}</blockquote>}</aside>
+    }
+  </div>
+  <footer class="graph-footer"><span><i class="dot technique"></i>Technique</span><span><i class="dot asset"></i>Asset</span><span class="legend-line">→ Report order</span><span class="legend-association">┄ Same sentence</span><span class="footer-note">Connections reflect report evidence, not verified causality.</span></footer>
+</section>

@@ -1,0 +1,20 @@
+[
+  {"id": "A0001", "name": "Workstation"},
+  {"id": "A0002", "name": "Human-Machine Interface (HMI)"},
+  {"id": "A0003", "name": "Programmable Logic Controller (PLC)"},
+  {"id": "A0004", "name": "Remote Terminal Unit (RTU)"},
+  {"id": "A0005", "name": "Intelligent Electronic Device (IED)"},
+  {"id": "A0006", "name": "Data Historian"},
+  {"id": "A0007", "name": "Control Server"},
+  {"id": "A0008", "name": "Application Server"},
+  {"id": "A0009", "name": "Data Gateway"},
+  {"id": "A0010", "name": "Safety Controller"},
+  {"id": "A0011", "name": "Virtual Private Network (VPN) Server"},
+  {"id": "A0012", "name": "Jump Host"},
+  {"id": "A0013", "name": "Field I/O"},
+  {"id": "A0014", "name": "Routers"},
+  {"id": "A0015", "name": "Switch"},
+  {"id": "A0016", "name": "Firewall"},
+  {"id": "A0017", "name": "Distributed Control System (DCS) Controller"},
+  {"id": "A0018", "name": "Programmable Automation Controller (PAC)"}
+]

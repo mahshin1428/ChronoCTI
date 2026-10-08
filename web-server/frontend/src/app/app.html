@@ -1,0 +1,22 @@
+<div class="app-shell" [class.resizing]="isDraggingSidebar()">
+  <header class="app-header">
+    <div class="brand"><button class="sidebar-toggle" aria-label="Toggle report panel" [attr.aria-expanded]="!isSidebarCollapsed()" (click)="toggleSidebar()">☰</button><div class="brand-mark"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M7 7L21 14L7 21Z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="7" r="3"/><circle cx="21" cy="14" r="3"/><circle cx="7" cy="21" r="3"/></svg></div><span>Chrono<span class="brand-accent">CTI</span></span><div class="brand-divider"></div><span class="workspace-label">THREAT INTELLIGENCE WORKSPACE</span></div>
+    <div class="header-right"><span class="workspace-status"><i></i>Report explorer</span><a href="/docs" target="_blank" rel="noopener noreferrer">API ↗</a></div>
+  </header>
+  <div class="main-body">
+    <aside class="sidebar" [style.width.px]="isSidebarCollapsed() ? 0 : sidebarWidth()" [class.collapsed]="isSidebarCollapsed()">
+      <div class="panel-intro"><span class="eyebrow">01 / SOURCE MATERIAL</span><h1>Follow the evidence.</h1><p>Turn a threat report into a connected picture of attacker behavior.</p></div>
+      <app-report-analyzer (onAnalysisComplete)="onAnalysisResult($event)" (busyChange)="isAnalyzing.set($event)" />
+      @if (result(); as data) {
+        <section class="report-summary"><div class="section-heading"><span class="eyebrow">REPORT OVERVIEW</span><span class="complete-badge">Analyzed</span></div><div class="report-name">{{ data.report_name }}</div><div class="summary-grid"><div><strong>{{ data.total_sentences }}</strong><span>Sentences</span></div><div><strong>{{ data.assets.length }}</strong><span>Assets</span></div><div><strong>{{ data.techniques.length }}</strong><span>Techniques</span></div></div></section>
+        <section class="entity-summary"><div class="section-heading"><span class="eyebrow">TECHNIQUES IN THIS REPORT</span><span>{{ data.techniques.length }}</span></div>@for (technique of data.techniques; track technique.id) {<div class="entity-row"><span class="entity-id">{{ technique.id }}</span><span>{{ technique.name }}</span><small>{{ technique.occurrence_count }}×</small></div>}@if (!data.techniques.length) {<p class="muted">No techniques detected.</p>}</section>
+        <section class="entity-summary"><div class="section-heading"><span class="eyebrow">ASSET CATEGORIES</span><span>{{ data.assets.length }}</span></div>@for (asset of data.assets; track asset.id) {<div class="entity-row asset-row"><span class="entity-id">{{ asset.id }}</span><span>{{ asset.name }}</span><small>{{ asset.occurrence_count }}×</small></div>}@if (!data.assets.length) {<p class="muted">No assets detected.</p>}</section>
+      } @else {
+        <div class="getting-started"><span class="eyebrow">HOW TO EXPLORE</span><div><b>1</b><p>Paste a report or load the example.</p></div><div><b>2</b><p>Build a graph of techniques and assets.</p></div><div><b>3</b><p>Select any entity or link to inspect its evidence.</p></div></div>
+      }
+      <div class="sidebar-footnote">Every connection has a source.<br><span>Review the evidence before drawing conclusions.</span></div>
+    </aside>
+    <div class="sidebar-resizer" (mousedown)="onResizerMouseDown($event)" title="Drag to resize report panel"></div>
+    <main class="canvas-wrapper"><app-attack-flow-canvas [graph]="currentGraph()" [loading]="isAnalyzing()" /></main>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+title: "Sentence to Asset Classifier"
+description: "Multi-label asset classification project using spaCy v3."
+vars:
+  name: "sentence_to_asset_classifier"
+  lang: "en"
+  gpu_id: -1
+  version: "0.0.1"
+  train: ""
+  dev: ""
+  config: ""
+  output: ""
+
+directories: ["assets", "corpus", "configs", "training", "scripts", "packages", "bagging_models"]
+
+assets:
+  - dest: "assets/${vars.train}"
+  - dest: "assets/${vars.dev}"
+
+workflows:
+  all:
+    - convert
+    - train
+    - evaluate
+
+commands:
+  - name: "convert"
+    help: "Convert JSONL datasets to spaCy binary DocBin format"
+    script:
+      - "python scripts/convert.py ${vars.lang} assets/${vars.train} corpus/train.spacy"
+      - "python scripts/convert.py ${vars.lang} assets/${vars.dev} corpus/dev.spacy"
+    deps:
+      - "assets/${vars.train}"
+      - "assets/${vars.dev}"
+      - "scripts/convert.py"
+    outputs:
+      - "corpus/train.spacy"
+      - "corpus/dev.spacy"
+
+  - name: "train"
+    help: "Train the multilabel textcat model"
+    script:
+      - "python -m spacy train configs/${vars.config} --output bagging_models/${vars.output} --paths.train corpus/train.spacy --paths.dev corpus/dev.spacy --nlp.lang ${vars.lang} --gpu-id ${vars.gpu_id}"
+    deps:
+      - "configs/${vars.config}"
+      - "corpus/train.spacy"
+      - "corpus/dev.spacy"
+    outputs:
+      - "bagging_models/${vars.output}/model-best"
+
+  - name: "evaluate"
+    help: "Evaluate model on dev/test set and save metrics"
+    script:
+      - "python -m spacy evaluate bagging_models/${vars.output}/model-best corpus/dev.spacy --output bagging_models/${vars.output}/metrics.json"
+    deps:
+      - "corpus/dev.spacy"
+      - "bagging_models/${vars.output}/model-best"
+    outputs:
+      - "bagging_models/${vars.output}/metrics.json"

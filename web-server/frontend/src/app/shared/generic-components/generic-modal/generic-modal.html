@@ -1,0 +1,29 @@
+@if (isOpen()) {
+  <div class="gen-modal-overlay active" (click)="onBackdropClick($event)">
+    <div class="gen-modal">
+      <div class="gen-modal-header">
+        <h3 class="gen-modal-title">
+          <ng-content select="[modal-title]"></ng-content>
+          @if (!title()) {
+            <span>Details</span>
+          } @else {
+            <span>{{ title() }}</span>
+          }
+        </h3>
+        <button class="gen-modal-close" (click)="closeModal()" aria-label="Close modal">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <div class="gen-modal-body">
+        <ng-content select="[modal-body]"></ng-content>
+        <ng-content></ng-content>
+      </div>
+
+      <div class="gen-modal-footer">
+        <ng-content select="[modal-footer]"></ng-content>
+        <button class="gen-modal-btn-close" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,44 @@
+<div class="gen-table-container">
+  @if (title()) {
+    <div class="gen-table-header">
+      <h4>{{ title() }}</h4>
+      <span class="count-badge">{{ data().length }} records</span>
+    </div>
+  }
+
+  @if (data() && data().length > 0) {
+    <div class="table-responsive">
+      <table class="gen-table">
+        <thead>
+          <tr>
+            @for (col of columns(); track col.key) {
+              <th [style.width]="col.width || 'auto'">{{ col.label }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of data(); track $index) {
+            <tr>
+              @for (col of columns(); track col.key) {
+                <td>
+                  @if (col.type === 'badge') {
+                    <span class="gen-table-badge" [ngClass]="getBadgeClass(col, row)">
+                      {{ formatValue(col, row) }}
+                    </span>
+                  } @else {
+                    {{ formatValue(col, row) }}
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="material-icons">inbox</span>
+      <p>{{ emptyMessage() }}</p>
+    </div>
+  }
+</div>

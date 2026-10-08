@@ -1,0 +1,18 @@
+<div class="scenario-panel">
+  <div class="scenario-header">
+    <span class="material-icons">auto_stories</span>
+    <h3>Curated Attack Flows</h3>
+  </div>
+
+  <div class="scenario-list">
+    @for (sc of scenarios(); track sc.id) {
+      <div 
+        class="scenario-item" 
+        [class.active]="sc.id === activeScenarioId()" 
+        (click)="selectScenario(sc.id)">
+        <div class="scenario-name">{{ sc.name }}</div>
+        <div class="scenario-desc">{{ sc.description }}</div>
+      </div>
+    }
+  </div>
+</div>

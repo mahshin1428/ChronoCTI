@@ -1,0 +1,10 @@
+<div class="report-input" [attr.aria-busy]="isAnalyzing()">
+  <div class="input-heading"><label for="report-text">Threat report</label><button class="example-button" (click)="loadExample()" [disabled]="isAnalyzing()">Try an example ↗</button></div>
+  <input class="report-name" aria-label="Report name" placeholder="Report name (optional)" [(ngModel)]="reportName" [disabled]="isAnalyzing()">
+  <textarea id="report-text" [(ngModel)]="reportText" [disabled]="isAnalyzing()" placeholder="Paste your CTI report here. Include the attacker’s actions, affected systems, and sequence of events…"></textarea>
+  <div class="input-meta"><span>{{ reportText.length | number }} characters</span><span>TXT / MD</span></div>
+  @if (errorMessage()) {<p class="error-banner" role="alert">{{ errorMessage() }}</p>}
+  <button class="analyze-button" [disabled]="isAnalyzing() || reportText.trim().length < 5" (click)="runAnalysis()"><span>{{ isAnalyzing() ? 'Analyzing report…' : 'Build knowledge graph' }}</span><span aria-hidden="true">→</span></button>
+  <label class="upload-button" [class.disabled]="isAnalyzing()"><span aria-hidden="true">↑</span> Import a text report<input aria-label="Import a text report" type="file" accept=".txt,.md" [disabled]="isAnalyzing()" (change)="onFileSelected($event)"></label>
+  <p class="input-note">Imported text appears above for review before analysis.</p>
+</div>

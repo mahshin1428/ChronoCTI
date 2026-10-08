@@ -1,0 +1,48 @@
+convert:
+  cmd: python -m weasel run convert
+  script:
+    - python scripts/convert.py en assets/train_test_splits/train_assets_split_4.jsonl
+      corpus/train.spacy
+    - python scripts/convert.py en assets/train_test_splits/test_assets_split_4.jsonl
+      corpus/dev.spacy
+  deps:
+    - path: assets/train_test_splits/train_assets_split_4.jsonl
+      md5: eaca5f5917389901950c6a4548d413bd
+    - path: assets/train_test_splits/test_assets_split_4.jsonl
+      md5: d1f60ae8df44cf3f270cb92a30d43836
+    - path: scripts/convert.py
+      md5: 35ee9ecddb27d1dbf74d9bc36fb44d0b
+  outs:
+    - path: corpus/train.spacy
+      md5: 8e320274783790cc9017835fdee96c68
+    - path: corpus/dev.spacy
+      md5: 2de21b435124507737dc443e904bc708
+train:
+  cmd: python -m weasel run train
+  script:
+    - python -m spacy train configs/config-roberta-base.cfg --output bagging_models/robertaBaseAll-4
+      --paths.train corpus/train.spacy --paths.dev corpus/dev.spacy --nlp.lang en
+      --gpu-id -1
+  deps:
+    - path: configs/config-roberta-base.cfg
+      md5: 4590e9efad78abacf5fa72dc1798956c
+    - path: corpus/train.spacy
+      md5: 8e320274783790cc9017835fdee96c68
+    - path: corpus/dev.spacy
+      md5: 2de21b435124507737dc443e904bc708
+  outs:
+    - path: bagging_models/robertaBaseAll-4/model-best
+      md5: 8c7afb5be926184a098e1b7ff51074ba
+evaluate:
+  cmd: python -m weasel run evaluate
+  script:
+    - python -m spacy evaluate bagging_models/robertaBaseAll-4/model-best corpus/dev.spacy
+      --output bagging_models/robertaBaseAll-4/metrics.json
+  deps:
+    - path: corpus/dev.spacy
+      md5: 2de21b435124507737dc443e904bc708
+    - path: bagging_models/robertaBaseAll-4/model-best
+      md5: 8c7afb5be926184a098e1b7ff51074ba
+  outs:
+    - path: bagging_models/robertaBaseAll-4/metrics.json
+      md5: c5c343d04ca69990f6d709f153db9199
