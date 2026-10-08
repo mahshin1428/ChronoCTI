@@ -6,7 +6,6 @@ Cybersecurity reports usually describe an intrusion in paragraphs. ChronoCTI use
 
 The repository contains a **research pipeline for learning temporal relationships** and an **interactive web application for exploring individual reports**.
 
-> **Code-only release:** Source code, configuration, documentation, and small label mappings are included. Datasets, trained models, intermediate results, and installed dependencies are excluded. The web application can use keyword rules when trained classifiers are unavailable; reproducing the research experiments requires the external data and models.
 
 ## Contents
 
